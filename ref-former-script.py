@@ -83,7 +83,6 @@ class EditParagraph(object):
 
         replaced_mark = 'THIS-TEXT-HAS-BEEN-REPLACED-WITH-REFFORMER-HAVE-A-NICE-DAY:*'
         text = self.text
-        brackets_open = False
         refs = re.findall(r'\[\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*]', text)
 
         numeric_refs = [strlist2numlist(
