@@ -4,6 +4,7 @@ import time
 import docx
 import re
 
+
 @dataclass
 class Reference(object):
     number_in_text: int
@@ -67,7 +68,6 @@ class EditParagraph(object):
     def edit_text(self):
 
         if self.__edited:
-            # print('The text has already been edited')
             return self.text
 
         def strlist2numlist(array: List[str]) -> List[int]:
@@ -84,27 +84,7 @@ class EditParagraph(object):
         replaced_mark = 'THIS-TEXT-HAS-BEEN-REPLACED-WITH-REFFORMER-HAVE-A-NICE-DAY:*'
         text = self.text
         brackets_open = False
-        refs = list()
-        string = str()
-
-        for char in text:
-
-            if char == '[':
-                string += char
-                brackets_open = True
-                continue
-
-            elif char == ']':
-                string += char
-                brackets_open = False
-                continue
-
-            if brackets_open:
-                string += char
-
-            if not brackets_open and string:
-                refs.append(string)
-                string = str()
+        refs = re.findall(r'\[\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*]', text)
 
         numeric_refs = [strlist2numlist(
             re.findall(r'\d\d*', string)
@@ -137,7 +117,11 @@ class EditParagraph(object):
 
 if __name__ == '__main__':
     path = '/home/user/path/to/my/thesis.docx'
+    path = '/home/user/Documents/Thesis/BTS-41-zachot-osen-2020-Zabolotniy-LitObzor_1_test.docx'
     print('RefFormer is starting...')
+
+    if path == '/home/user/path/to/my/thesis.docx':
+        path = input('Enter path to the document: ')
     start = time.time()
     doc = docx.Document(path)
     print('Document found. Reading...')
@@ -155,7 +139,9 @@ if __name__ == '__main__':
             for ref in refs:
                 nums += re.findall(r'\d+', ref)
                 nums = [int(num) for num in nums]
+
             for num in nums:
+
                 if num in all_numbers:
                     continue
                 else:
