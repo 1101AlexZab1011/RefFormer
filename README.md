@@ -21,5 +21,6 @@ Simple script to sort references in document
 * Work with ".doc" format
 * **Recognize references in lists and tables**
 * Work with unused references
-* Work correctly if all references are already sorted. **Do not run the script twice!**
+* recognize more than 8 references in a row. Example: `[1, 2, 3, 4, 5, 6, 7, 8, 9]`
+
 > *I have not tested this script on Windows, so I don’t know how it will work on it.*
