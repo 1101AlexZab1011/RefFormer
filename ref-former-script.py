@@ -4,18 +4,6 @@ import time
 import docx
 import re
 
-# path = '/home/user/path/to/my/thesis.docx'
-path = '/home/user/Documents/Thesis/BTS-41-zachot-osen-2020-Zabolotniy-LitObzor_1_test.docx'
-start = time.time()
-doc = docx.Document(path)
-print('Document found. Reading...')
-ref_section: bool = False
-paragraphs = list()
-refs_count = 0
-all_numbers = dict()
-all_links = list()
-
-
 @dataclass
 class Reference(object):
     number_in_text: int
@@ -147,73 +135,85 @@ class EditParagraph(object):
         return self.text
 
 
-for paragraph, p_number in zip(doc.paragraphs, range(len(doc.paragraphs))):
-    refs = re.findall(r'\[\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*]', paragraph.text)
-    if refs:
-        nums = list()
+if __name__ == '__main__':
+    path = '/home/user/path/to/my/thesis.docx'
+    print('RefFormer is starting...')
+    start = time.time()
+    doc = docx.Document(path)
+    print('Document found. Reading...')
+    ref_section: bool = False
+    paragraphs = list()
+    refs_count = 0
+    all_numbers = dict()
+    all_links = list()
 
-        for ref in refs:
-            nums += re.findall(r'\d+', ref)
-            nums = [int(num) for num in nums]
-        for num in nums:
-            if num in all_numbers:
-                continue
-            else:
-                all_numbers.update({
-                    num: len(all_numbers.values()) + 1
-                })
+    for paragraph, p_number in zip(doc.paragraphs, range(len(doc.paragraphs))):
+        refs = re.findall(r'\[\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*,?\s?\d*]', paragraph.text)
+        if refs:
+            nums = list()
 
-        paragraphs.append(
-            EditParagraph(
-                paragraph,
-                p_number,
-                [
-                    (num, all_numbers[num])
-                    for num in nums
-                ]
-            )
-        )
+            for ref in refs:
+                nums += re.findall(r'\d+', ref)
+                nums = [int(num) for num in nums]
+            for num in nums:
+                if num in all_numbers:
+                    continue
+                else:
+                    all_numbers.update({
+                        num: len(all_numbers.values()) + 1
+                    })
 
-    if 'References section' in paragraph.text:
-        ref_section = True
-
-    if ref_section:
-        links = re.findall(r'^\s*\d\d*\.\s', paragraph.text)
-
-        if links:
-            lnum = int(
-                re.findall(r'\d\d*', links[0])[0]
-            )
-
-            for i in range(len(paragraph.text)):
-                if paragraph.text[i] == '.':
-                    text = paragraph.text[i + 2:]
-                    break
-            if not text:
-                raise ValueError(f'Check the paragraph:\n{paragraph.text}')
-
-            all_links.append(
-                Link(
-                    f'{all_numbers[lnum]}. {text}',
-                    lnum,
-                    all_numbers[lnum],
+            paragraphs.append(
+                EditParagraph(
+                    paragraph,
                     p_number,
-                    p_number + all_numbers[lnum] - lnum,
-                    paragraph.style
+                    [
+                        (num, all_numbers[num])
+                        for num in nums
+                    ]
                 )
             )
 
-for paragraph in paragraphs:
-    paragraph.edit_text()
+        if 'References section' in paragraph.text:
+            ref_section = True
 
-for paragraph in paragraphs:
-    doc.paragraphs[paragraph.p_number].text = paragraph.text
-    doc.paragraphs[paragraph.p_number].style = paragraph.style
+        if ref_section:
+            links = re.findall(r'^\s*\d\d*\.\s', paragraph.text)
 
-for link in all_links:
-    doc.paragraphs[link.p2change].text = link.text
-    doc.paragraphs[link.p2change].style = link.style
+            if links:
+                lnum = int(
+                    re.findall(r'\d\d*', links[0])[0]
+                )
 
-doc.save(path)
+                for i in range(len(paragraph.text)):
+                    if paragraph.text[i] == '.':
+                        text = paragraph.text[i + 2:]
+                        break
+                if not text:
+                    raise ValueError(f'Check the paragraph:\n{paragraph.text}')
 
-print(f'RefFormer has finished working. Check carefully if everything is correct.\nRUNTIME: {time.time() - start}')
+                all_links.append(
+                    Link(
+                        f'{all_numbers[lnum]}. {text}',
+                        lnum,
+                        all_numbers[lnum],
+                        p_number,
+                        p_number + all_numbers[lnum] - lnum,
+                        paragraph.style
+                    )
+                )
+
+    for paragraph in paragraphs:
+        paragraph.edit_text()
+
+    for paragraph in paragraphs:
+        doc.paragraphs[paragraph.p_number].text = paragraph.text
+        doc.paragraphs[paragraph.p_number].style = paragraph.style
+
+    for link in all_links:
+        doc.paragraphs[link.p2change].text = link.text
+        doc.paragraphs[link.p2change].style = link.style
+
+    doc.save(path)
+
+    print(f'RefFormer has finished working. Check carefully if everything is correct.\nRUNTIME: {time.time() - start}')
