@@ -116,7 +116,6 @@ class EditParagraph(object):
 
 if __name__ == '__main__':
     path = '/home/user/path/to/my/thesis.docx'
-    path = '/home/user/Documents/Thesis/BTS-41-zachot-osen-2020-Zabolotniy-LitObzor_1_test.docx'
     print('RefFormer is starting...')
 
     if path == '/home/user/path/to/my/thesis.docx':
