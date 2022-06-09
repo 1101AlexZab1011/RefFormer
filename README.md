@@ -1,5 +1,5 @@
 # RefFormer
-Simple script to sort references in document
+Simple script to sort references in a document
 ## How to use
 1. Install [git](https://git-scm.com/downloads)
 3. Install [python](https://www.python.org/downloads/)
